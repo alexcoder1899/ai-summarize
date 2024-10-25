@@ -98,13 +98,13 @@ const FeedlyUrlItem: React.FC<UrlItemProps & FeedlyUrlItemProps> = ({
       onClick={onItemClick}
     >
       <FeedlyIcon
-        className={clsx("shrink-0 group-hover:stroke-primary", {
+        className={clsx("mt-2 shrink-0 group-hover:stroke-primary", {
           "stroke-primary": highlighted
         })}
         width={24}
       />
       <div
-        className={clsx("flex flex-col gap-y-2", {
+        className={clsx("flex grow flex-col gap-y-2", {
           "text-primary": highlighted
         })}
       >
@@ -328,7 +328,7 @@ const Summary: React.FC = () => {
                 6 >=
               (type === "text"
                 ? textUrls
-                : type === "feedly"
+                : type === "rss"
                 ? rssUrls
                 : feedlyUrls
               ).length
