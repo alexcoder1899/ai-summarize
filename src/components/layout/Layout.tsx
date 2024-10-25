@@ -10,8 +10,14 @@ import config from "@/config";
 const Layout: React.FC = () => {
   const navigate = useNavigate();
   const { isLoading, setLoading } = useContext(LoadingContext);
-  const { type, textUrls, rssUrls, feedlyUrls, updateFeedlyUrls } =
-    useContext(ContentContext);
+  const {
+    type,
+    textUrls,
+    rssUrls,
+    feedlyUrls,
+    updateFeedlyUrls,
+    updateFeedlySummaries
+  } = useContext(ContentContext);
 
   useEffect(() => {
     if (type === "") navigate("/");
@@ -31,6 +37,9 @@ const Layout: React.FC = () => {
         .then((response) => response.data)
         .then((response: any[]) => {
           updateFeedlyUrls(response);
+          updateFeedlySummaries(
+            response.map(() => ({ ai_text: "", summary: "" }))
+          );
           if (response.length > 0) navigate("/summary");
         })
         .finally(() => {

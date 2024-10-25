@@ -26,7 +26,7 @@ const TextUrlItem: React.FC<UrlItemProps & TextUrlItemProps> = ({
 }) => (
   <div
     className={clsx(
-      "group flex cursor-pointer items-center gap-x-4 text-white hover:text-primary",
+      "group flex cursor-pointer items-center gap-x-4 overflow-hidden text-white hover:text-primary",
       { "!text-primary": highlighted }
     )}
     onClick={onItemClick}
@@ -57,7 +57,7 @@ const RSSUrlItem: React.FC<UrlItemProps & RSSUrlItemProps> = ({
   return (
     <div
       className={clsx(
-        "group flex cursor-pointer gap-x-4 text-white hover:text-primary",
+        "group flex cursor-pointer gap-x-4 overflow-hidden text-white hover:text-primary",
         { "text-primary": highlighted }
       )}
       onClick={onItemClick}
@@ -92,7 +92,7 @@ const FeedlyUrlItem: React.FC<UrlItemProps & FeedlyUrlItemProps> = ({
   return (
     <div
       className={clsx(
-        "group flex cursor-pointer gap-x-4 text-white hover:text-primary",
+        "group flex cursor-pointer gap-x-4 overflow-hidden text-white hover:text-primary",
         { "text-primary": highlighted }
       )}
       onClick={onItemClick}
