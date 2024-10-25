@@ -218,20 +218,20 @@ const Summary: React.FC = () => {
           setLoading(false);
         });
     },
-    [type]
+    [type, textSummaries, rssSummaries, feedlySummaries]
   );
 
   const handlePagePrev = useCallback(() => {
     if (type === "text") updateTextPage(textPage - 1);
     else if (type === "rss") updateRssPage(rssPage - 1);
     else updateRssPage(feedlyPage - 1);
-  }, [type, textPage, rssPage]);
+  }, [type, textPage, rssPage, feedlyPage]);
 
   const handlePageNext = useCallback(() => {
     if (type === "text") updateTextPage(textPage + 1);
     else if (type === "rss") updateRssPage(rssPage + 1);
     else updateFeedlyPage(feedlyPage + 1);
-  }, [type, textPage, rssPage]);
+  }, [type, textPage, rssPage, feedlyPage]);
 
   useEffect(() => {
     if (type === "text" && textSummaries[textIndex]?.[curSection]) {
@@ -244,7 +244,16 @@ const Summary: React.FC = () => {
     ) {
       setContent(feedlySummaries[feedlyIndex]?.[curSection]);
     }
-  }, [type, curSection, textIndex, textSummaries, rssIndex, rssSummaries]);
+  }, [
+    type,
+    curSection,
+    textIndex,
+    textSummaries,
+    rssIndex,
+    rssSummaries,
+    feedlyIndex,
+    feedlySummaries
+  ]);
 
   return (
     <div className="flex flex-1 flex-col gap-y-6 overflow-y-auto">
