@@ -1,26 +1,43 @@
+import axios from "axios";
 import { useContext, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 
 import Header from "./Header";
 import { LogoIcon } from "@/components/icons/LogoIcon";
 import { ContentContext, LoadingContext } from "@/contexts";
+import config from "@/config";
 
 const Layout: React.FC = () => {
   const navigate = useNavigate();
-  const { isLoading } = useContext(LoadingContext);
-  const { type, textUrls, rssUrls } = useContext(ContentContext);
-
-  console.log(rssUrls);
+  const { isLoading, setLoading } = useContext(LoadingContext);
+  const { type, textUrls, rssUrls, feedlyUrls, updateFeedlyUrls } =
+    useContext(ContentContext);
 
   useEffect(() => {
     if (type === "") navigate("/");
-    else
+    else if (type !== "feedly")
       navigate(
         (type === "text" ? textUrls : rssUrls).length > 0
           ? "/summary"
           : "/url-upload"
       );
-  }, [type, textUrls, rssUrls]);
+    else {
+      if (feedlyUrls.length > 0) {
+        return navigate("/summary");
+      }
+      setLoading(true);
+      axios
+        .get(`${config.api_endpoint}/feed/`)
+        .then((response) => response.data)
+        .then((response: any[]) => {
+          updateFeedlyUrls(response);
+          if (response.length > 0) navigate("/summary");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [type, textUrls, rssUrls, feedlyUrls]);
 
   return (
     <div className="h-screen w-screen bg-primary-background">

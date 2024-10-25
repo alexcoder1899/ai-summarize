@@ -1,13 +1,14 @@
 import axios from "axios";
 import { useCallback, useContext, useEffect, useState } from "react";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 import clsx from "clsx";
 
 import Button from "@/components/common/Button";
 import { TextUrlIcon } from "@/components/icons/TextUrlIcon";
 import { RSSIcon } from "@/components/icons/RSSIcon";
-import { ContentContext, LoadingContext, RssURL } from "@/contexts";
+import { FeedlyIcon } from "@/components/icons/FeedlyIcon";
+import { CommonUrl, ContentContext, LoadingContext } from "@/contexts";
 import config from "@/config";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa6";
 
 type UrlItemProps = {
   highlighted: boolean;
@@ -26,14 +27,18 @@ const TextUrlItem: React.FC<UrlItemProps & TextUrlItemProps> = ({
   <div
     className={clsx(
       "group flex cursor-pointer items-center gap-x-4 text-white hover:text-primary",
-      { "text-primary": highlighted }
+      { "!text-primary": highlighted }
     )}
     onClick={onItemClick}
   >
     <TextUrlIcon
-      className={clsx("shrink-0 group-hover:stroke-primary", {
-        "stroke-primary": highlighted
-      })}
+      fill="#B03DF8"
+      className={clsx(
+        "shrink-0 group-hover:!fill-primary group-hover:stroke-primary",
+        {
+          "stroke-primary": highlighted
+        }
+      )}
       width={24}
     />
     <p className="line-clamp-1 font-bold">{url}</p>
@@ -41,7 +46,7 @@ const TextUrlItem: React.FC<UrlItemProps & TextUrlItemProps> = ({
 );
 
 type RSSUrlItemProps = {
-  url: RssURL;
+  url: CommonUrl;
 };
 
 const RSSUrlItem: React.FC<UrlItemProps & RSSUrlItemProps> = ({
@@ -58,6 +63,41 @@ const RSSUrlItem: React.FC<UrlItemProps & RSSUrlItemProps> = ({
       onClick={onItemClick}
     >
       <RSSIcon
+        width={24}
+        className={clsx("mt-2 shrink-0 group-hover:stroke-primary", {
+          "stroke-primary": highlighted
+        })}
+      />
+      <div
+        className={clsx("flex flex-col gap-y-2", {
+          "text-primary": highlighted
+        })}
+      >
+        <p className="line-clamp-1 text-[24px] font-bold">{url.title}</p>
+        <p className="line-clamp-3 text-[18px]">{url.summary}</p>
+      </div>
+    </div>
+  );
+};
+
+type FeedlyUrlItemProps = {
+  url: CommonUrl;
+};
+
+const FeedlyUrlItem: React.FC<UrlItemProps & FeedlyUrlItemProps> = ({
+  url,
+  highlighted,
+  onItemClick
+}) => {
+  return (
+    <div
+      className={clsx(
+        "group flex cursor-pointer gap-x-4 text-white hover:text-primary",
+        { "text-primary": highlighted }
+      )}
+      onClick={onItemClick}
+    >
+      <FeedlyIcon
         className={clsx("shrink-0 group-hover:stroke-primary", {
           "stroke-primary": highlighted
         })}
@@ -80,6 +120,7 @@ const Summary: React.FC = () => {
     type,
     textUrls,
     rssUrls,
+    feedlyUrls,
     textIndex,
     updateTextIndex,
     textPage,
@@ -88,10 +129,16 @@ const Summary: React.FC = () => {
     updateRssIndex,
     rssPage,
     updateRssPage,
+    feedlyIndex,
+    updateFeedlyIndex,
+    feedlyPage,
+    updateFeedlyPage,
     textSummaries,
     updateTextSummaries,
     rssSummaries,
-    updateRssSummaries
+    updateRssSummaries,
+    feedlySummaries,
+    updateFeedlySummaries
   } = useContext(ContentContext);
   const { setLoading } = useContext(LoadingContext);
   const [curSection, setCurSection] = useState<"ai_text" | "summary">(
@@ -102,19 +149,26 @@ const Summary: React.FC = () => {
   const handleUrlItemClick = useCallback(
     (url: string, currentIdx: number) => () => {
       if (type === "text") {
+        updateTextIndex(currentIdx);
         const text = textSummaries[currentIdx]?.[curSection];
         if (text) {
           setContent(text);
           return;
         }
-        updateTextIndex(currentIdx);
       } else if (type === "rss") {
+        updateRssIndex(currentIdx);
         const text = rssSummaries[currentIdx]?.[curSection];
         if (text) {
           setContent(text);
           return;
         }
-        updateRssIndex(currentIdx);
+      } else {
+        updateFeedlyIndex(currentIdx);
+        const text = feedlySummaries[currentIdx]?.[curSection];
+        if (text) {
+          setContent(text);
+          return;
+        }
       }
       setLoading(true);
       axios
@@ -146,6 +200,18 @@ const Summary: React.FC = () => {
                   : summary
               )
             );
+          } else {
+            updateFeedlySummaries(
+              feedlySummaries.map((summary, idx) =>
+                idx === currentIdx
+                  ? {
+                      ...summary,
+                      ai_text: ai_content,
+                      summary: summary_content
+                    }
+                  : summary
+              )
+            );
           }
         })
         .finally(() => {
@@ -158,11 +224,13 @@ const Summary: React.FC = () => {
   const handlePagePrev = useCallback(() => {
     if (type === "text") updateTextPage(textPage - 1);
     else if (type === "rss") updateRssPage(rssPage - 1);
+    else updateRssPage(feedlyPage - 1);
   }, [type, textPage, rssPage]);
 
   const handlePageNext = useCallback(() => {
     if (type === "text") updateTextPage(textPage + 1);
     else if (type === "rss") updateRssPage(rssPage + 1);
+    else updateFeedlyPage(feedlyPage + 1);
   }, [type, textPage, rssPage]);
 
   useEffect(() => {
@@ -170,10 +238,13 @@ const Summary: React.FC = () => {
       setContent(textSummaries[textIndex]?.[curSection]);
     } else if (type === "rss" && rssSummaries[rssIndex]?.[curSection]) {
       setContent(rssSummaries[rssIndex]?.[curSection]);
+    } else if (
+      type === "feedly" &&
+      feedlySummaries[feedlyIndex]?.[curSection]
+    ) {
+      setContent(feedlySummaries[feedlyIndex]?.[curSection]);
     }
   }, [type, curSection, textIndex, textSummaries, rssIndex, rssSummaries]);
-
-  console.log(rssPage);
 
   return (
     <div className="flex flex-1 flex-col gap-y-6 overflow-y-auto">
@@ -182,37 +253,56 @@ const Summary: React.FC = () => {
       </p>
       <div className="flex flex-col items-center gap-y-6">
         <div className="grid w-full grid-cols-3 gap-3">
-          {type === "text" ? (
-            textUrls
-              .slice(textPage * 6, textPage * 6 + 6)
-              .map((url, idx) => (
-                <TextUrlItem
-                  key={idx}
-                  url={url}
-                  highlighted={idx + textPage * 6 === textIndex}
-                  onItemClick={handleUrlItemClick(url, idx + textPage * 6)}
-                />
-              ))
-          ) : type === "rss" ? (
-            rssUrls
-              .slice(rssPage * 6, rssPage * 6 + 6)
-              .map((url, idx) => (
-                <RSSUrlItem
-                  key={idx}
-                  url={url}
-                  highlighted={idx + rssPage * 6 === rssIndex}
-                  onItemClick={handleUrlItemClick(url.link, idx + rssPage * 6)}
-                />
-              ))
-          ) : (
-            <></>
-          )}
+          {type === "text"
+            ? textUrls
+                .slice(textPage * 6, textPage * 6 + 6)
+                .map((url, idx) => (
+                  <TextUrlItem
+                    key={idx}
+                    url={url}
+                    highlighted={idx + textPage * 6 === textIndex}
+                    onItemClick={handleUrlItemClick(url, idx + textPage * 6)}
+                  />
+                ))
+            : type === "rss"
+            ? rssUrls
+                .slice(rssPage * 6, rssPage * 6 + 6)
+                .map((url, idx) => (
+                  <RSSUrlItem
+                    key={idx}
+                    url={url}
+                    highlighted={idx + rssPage * 6 === rssIndex}
+                    onItemClick={handleUrlItemClick(
+                      url.link,
+                      idx + rssPage * 6
+                    )}
+                  />
+                ))
+            : feedlyUrls
+                .slice(feedlyPage * 6, feedlyPage * 6 + 6)
+                .map((url, idx) => (
+                  <FeedlyUrlItem
+                    key={idx}
+                    url={url}
+                    highlighted={idx + feedlyPage * 6 === feedlyIndex}
+                    onItemClick={handleUrlItemClick(
+                      url.link,
+                      idx + feedlyPage * 6
+                    )}
+                  />
+                ))}
         </div>
         <div className="flex gap-x-6">
           <button
             className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white text-[#3378BC] disabled:bg-gray-400"
             onClick={handlePagePrev}
-            disabled={(type === "text" ? textPage : rssPage) === 0}
+            disabled={
+              (type === "text"
+                ? textPage
+                : type === "rss"
+                ? rssPage
+                : feedlyPage) === 0
+            }
           >
             <FaChevronLeft />
           </button>
@@ -220,8 +310,19 @@ const Summary: React.FC = () => {
             className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white text-[#3378BC] disabled:bg-gray-400"
             onClick={handlePageNext}
             disabled={
-              ((type === "text" ? textPage : rssPage) + 1) * 6 >=
-              (type === "text" ? textUrls : rssUrls).length
+              ((type === "text"
+                ? textPage
+                : type === "rss"
+                ? rssPage
+                : feedlyPage) +
+                1) *
+                6 >=
+              (type === "text"
+                ? textUrls
+                : type === "feedly"
+                ? rssUrls
+                : feedlyUrls
+              ).length
             }
           >
             <FaChevronRight />

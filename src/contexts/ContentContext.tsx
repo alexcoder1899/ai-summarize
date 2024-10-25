@@ -7,7 +7,7 @@ type SummaryContent = {
   summary: string;
 };
 
-type RssURL = {
+type CommonUrl = {
   title: string;
   summary: string;
   link: string;
@@ -18,8 +18,10 @@ interface IContentContext {
   updateType: (type: ContentType) => void;
   textUrls: string[];
   updateTextUrls: (urls: string[]) => void;
-  rssUrls: RssURL[];
-  updateRssUrls: (urls: RssURL[]) => void;
+  rssUrls: CommonUrl[];
+  updateRssUrls: (urls: CommonUrl[]) => void;
+  feedlyUrls: CommonUrl[];
+  updateFeedlyUrls: (urls: CommonUrl[]) => void;
   textIndex: number;
   updateTextIndex: (index: number) => void;
   textPage: number;
@@ -28,10 +30,16 @@ interface IContentContext {
   updateRssIndex: (index: number) => void;
   rssPage: number;
   updateRssPage: (page: number) => void;
+  feedlyIndex: number;
+  updateFeedlyIndex: (index: number) => void;
+  feedlyPage: number;
+  updateFeedlyPage: (page: number) => void;
   textSummaries: SummaryContent[];
   updateTextSummaries: (summaries: SummaryContent[]) => void;
   rssSummaries: SummaryContent[];
   updateRssSummaries: (summaries: SummaryContent[]) => void;
+  feedlySummaries: SummaryContent[];
+  updateFeedlySummaries: (summaries: SummaryContent[]) => void;
 }
 
 export const ContentContext = createContext<IContentContext>({
@@ -41,6 +49,8 @@ export const ContentContext = createContext<IContentContext>({
   updateTextUrls: () => {},
   rssUrls: [],
   updateRssUrls: () => {},
+  feedlyUrls: [],
+  updateFeedlyUrls: () => {},
   textIndex: -1,
   updateTextIndex: () => {},
   textPage: 0,
@@ -49,10 +59,16 @@ export const ContentContext = createContext<IContentContext>({
   updateRssIndex: () => {},
   rssPage: 0,
   updateRssPage: () => {},
+  feedlyIndex: -1,
+  updateFeedlyIndex: () => {},
+  feedlyPage: 0,
+  updateFeedlyPage: () => {},
   textSummaries: [],
   updateTextSummaries: () => {},
   rssSummaries: [],
-  updateRssSummaries: () => {}
+  updateRssSummaries: () => {},
+  feedlySummaries: [],
+  updateFeedlySummaries: () => {}
 });
 
-export type { ContentType, RssURL, SummaryContent };
+export type { ContentType, CommonUrl, SummaryContent };
